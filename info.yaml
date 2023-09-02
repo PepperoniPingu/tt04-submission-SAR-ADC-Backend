@@ -24,21 +24,43 @@ documentation:
   author:       "Hugo Frisk (PepperoniPingu)"      # Your name
   title:        "SAR ADC Backend"      # Project title
   language:     "Wokwi" # other examples include Verilog, Amaranth, VHDL, etc
-  description:  "The digital backend of a successive approximation digital to analog converter (SAR ADC). You can choose between two interfaces: I2C or 6 bit paralell bus with Start and Busy signals."      # Short description of what your project does
+  description:  "A digital backend of a successive approximation digital to analog converter (SAR ADC) featuring two interfaces, I2C or a 11 bit parallel bus."      # Short description of what your project does
 
 # Longer description of how the project works. You can use standard markdown format.
   how_it_works: |
-      Explain how your project works
+      This is a digital backend of a charge redistrbution successive approximation analog to digital converter (SAR ADC).
+      A SAR ADC converts an analog voltage to a digital value by successively recreating better and better
+      approximations of the input analog signal. This is done by connecting capacitors of decreasing
+      value to a big capacitor with the original analog value stored. It will create a capacitive 
+      divider and a new voltage. This voltage is sent to a comparator and compared with a 
+      reference voltage. See Wikipedia for a better explanation: https://en.wikipedia.org/wiki/Successive-approximation_ADC 
 
 # Instructions on how someone could test your project, include things like what buttons do what and how to set the clock if needed
   how_to_test:  |
-      Explain how to test your project
+      There are two ways to interface with the ADC:
+
+      1. With a 6 or 11 bit paralell bus
+      To make a measurement, START/BUSY, needs to be pulsed High. 
+      While the measurement is taking place the pin will remain high as to signal that it is busy.
+      When the pin goes low, the measurement is done. 
+      Read the measurement by storing C0 through C10. C0 is MSB and C10 is LSB. 
+      
+      The precision of the ADC can be set to either 11 bits or 6 bits for faster measurements. 
+      When PRECSEL is low, the ADC is in 11 bit mode. When PRECSEL is high, the ADC is in 6 bit mode.
+      
+      2. Through I2C
+      Connect SCL and SDA to a microcontroller. Make sure to have pullups. 
+      The I2C address of the ADC can be configured to either 0x34 or 0x35. 
+      When ADRSEL is high, the address is 0x34 and when it is low it is 0x35.
+      To make a measurement, send a write command to configured address with the data 0x01.
+      Read the measurement by requesting 2 bytes from configured address. 
+      It will NACK the request if it is still busy with the measurement. 
 
 # A description of what the inputs do (e.g. red button, SPI CLK, SPI MOSI, etc).
   inputs:               
-    - none
-    - none
-    - none
+    - CMPR - Output from comparator
+    - PRECSEL - Precision select. HIGH = 6 bits, LOW = 11 bits
+    - ADRSEL - I2C address select. HIGH = 0x34, LOW = 0x35
     - none
     - none
     - none
@@ -46,29 +68,29 @@ documentation:
     - none
 # A description of what the outputs do (e.g. status LED, SPI MISO, etc)
   outputs:
-    - segment a
-    - segment b
-    - segment c
-    - segment d
-    - segment e
-    - segment f
-    - segment g
-    - dot
+    - C0
+    - C1
+    - C2
+    - C3
+    - C4
+    - C5
+    - C6
+    - C7
 # A description of what the bidirectional I/O pins do (e.g. I2C SDA, I2C SCL, etc)
   bidirectional:
-    - none
-    - none
-    - none
-    - none
-    - none
-    - none
-    - none
-    - none
+    - START/BUSY - Pull low to start a conversion. It will automatically remain low for the duration of the conversion to signal that the ADC is busy. 
+    - SCL
+    - SDA
+    - C8
+    - C9
+    - C10
+    - INCTRL - Control signal for external mosfets that connects the analog input to capacitor bank and charges them in sample mode. 
+    - GNDCTRL - Control signal for external mosfet that connects the capacitor bank to ground when in sample mode. 
 
 # The following fields are optional
   tag:          ""      # comma separated list of tags: test, encryption, experiment, clock, animation, utility, industrial, pwm, fpga, alu, microprocessor, risc, riscv, sensor, signal generator, fft, filter, music, bcd, sound, serial, timer, random number generator, calculator, decoder, counter, puzzle, multiplier, game, oscillator,
   external_hw:  ""      # Describe any external hardware needed
   discord:      ""      # Your discord handle, used for communication and automatically assigning tapeout role after a submission
   doc_link:     ""      # URL to longer form documentation, eg the README.md in your repository
-  clock_hz:     0       # Clock frequency in Hz (if required)
+  clock_hz:     100000       # Clock frequency in Hz (if required)
   picture:      ""      # relative path to a picture in your repository (must be 512kb or less)
