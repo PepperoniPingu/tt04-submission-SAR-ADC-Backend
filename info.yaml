@@ -41,7 +41,7 @@ documentation:
 
 # Instructions on how someone could test your project, include things like what buttons do what and how to set the clock if needed
   how_to_test:  |
-      The precision of the ADC can be set to either 11-bits or 6-bits for faster measurements. When PRECSEL is low, the ADC is in 
+      The precision of the ADC can be set to either 11-bits or 6-bits (for faster measurements). When PRECSEL is low, the ADC is in 
       11-bit mode. When PRECSEL is high, the ADC is in 6-bit mode. S6 through S10 should be left floating when in 6-bit mode.
 
       In the picture of this design there is an example circuit of how the analog frontend could be built. Note that it is not 
@@ -55,10 +55,15 @@ documentation:
           S10. S0 is MSB and S10 is LSB.  
       
         2. Through I2C:
-          Connect SCL and SDA to a microcontroller. Make sure to have pullups. The I2C address of the ADC can be configured to 
+          Connect SCL and SDA to a microcontroller with pullups. The I2C address of the ADC can be configured to 
           either 0x34 or 0x35. When ADRSEL is high, the address is 0x34 and when it is low it is 0x35. To make a measurement, 
           send a write command to configured address with the data 0x01. Read the measurement by requesting 2 bytes from 
           configured address. The ADC will NACK the request if it is still busy with the measurement. 
+
+      Make sure RST_N is pulsed low after a power cycle. 
+      
+      The clock speed that this design works at is yet to be determined and is left as an exercise to the engineer. 
+
 
 # A description of what the inputs do (e.g. red button, SPI CLK, SPI MOSI, etc).
   inputs:               
